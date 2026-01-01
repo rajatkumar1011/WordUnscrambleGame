@@ -1,889 +1,919 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Shuffle, ArrowRight, Check, Trophy, Flame, Sparkles, Github, Linkedin, RotateCcw } from 'lucide-react';
-
-// Comprehensive list of tech terminology
-const WORD_BANK = [
-  { word: "ABSTRACTION", hint: "Hiding complex details." },
-  { word: "ACCUMULATOR", hint: "Register where arithmetic results are stored." },
-  { word: "ACTIVATION", hint: "Process of making software active." },
-  { word: "ADAPTIVE", hint: "System that changes based on inputs." },
-  { word: "ADDRESS", hint: "Location in memory." },
-  { word: "AGGREGATE", hint: "Collection of items." },
-  { word: "ALGORITHM", hint: "Step-by-step instructions." },
-  { word: "ALLOCATION", hint: "Reserving memory." },
-  { word: "ANALYTICS", hint: "Discovery of patterns in data." },
-  { word: "ANIMATION", hint: "Illusion of motion." },
-  { word: "ANOMALY", hint: "Deviation from the rule." },
-  { word: "ANTIVIRUS", hint: "Software to prevent malware." },
-  { word: "APERTURE", hint: "Opening in a lens." },
-  { word: "APPEND", hint: "Add to the end." },
-  { word: "APPLICATION", hint: "Program designed for end users." },
-  { word: "ARCHITECTURE", hint: "Fundamental structure of a system." },
-  { word: "ARGUMENT", hint: "Value passed to a function." },
-  { word: "ARITHMETIC", hint: "Branch of mathematics." },
-  { word: "ARRAY", hint: "Collection of items at contiguous memory." },
-  { word: "ARTIFICIAL", hint: "Made by humans, not natural." },
-  { word: "ASSEMBLER", hint: "Translates assembly to machine code." },
-  { word: "ASSIGNMENT", hint: "Setting a value to a variable." },
-  { word: "ASYNCHRONOUS", hint: "Events occurring independently." },
-  { word: "ATTRIBUTE", hint: "Property of an object/tag." },
-  { word: "AUTHENTICATION", hint: "Verifying identity." },
-  { word: "AUTOMATION", hint: "Automatic operation." },
-  { word: "AVAILABILITY", hint: "System uptime." },
-  { word: "BACKBONE", hint: "Central part of a network." },
-  { word: "BACKGROUND", hint: "Area behind the main content." },
-  { word: "BACKTRACKING", hint: "Algorithmic technique for solving problems." },
-  { word: "BALANCING", hint: "Distributing workloads." },
-  { word: "BANDWIDTH", hint: "Maximum data transfer rate." },
-  { word: "BASELINE", hint: "Standard for comparison." },
-  { word: "BENCHMARK", hint: "Test to measure performance." },
-  { word: "BIGDATA", hint: "Extremely large data sets." },
-  { word: "BIOMETRIC", hint: "Biological data for ID." },
-  { word: "BITCOIN", hint: "Digital cryptocurrency." },
-  { word: "BLOCKCHAIN", hint: "Distributed ledger technology." },
-  { word: "BLUETOOTH", hint: "Wireless technology standard." },
-  { word: "BOOLEAN", hint: "True or False." },
-  { word: "BOTNET", hint: "Network of infected computers." },
-  { word: "BREADCRUMB", hint: "Navigation aid." },
-  { word: "BROADCAST", hint: "Message to all network nodes." },
-  { word: "BROWSER", hint: "Tool to access the web." },
-  { word: "BUFFER", hint: "Temporary memory storage." },
-  { word: "BYTECODE", hint: "Instruction set for a VM." },
-  { word: "CACHE", hint: "Fast storage for frequent data." },
-  { word: "CALCULATOR", hint: "Device for math operations." },
-  { word: "CALLBACK", hint: "Function passed as an argument." },
-  { word: "CAPACITOR", hint: "Stores electrical energy." },
-  { word: "CAPACITY", hint: "Maximum amount that can be held." },
-  { word: "CELLULAR", hint: "Mobile network technology." },
-  { word: "CERTIFICATE", hint: "Digital document proving identity." },
-  { word: "CHANNEL", hint: "Medium for data transfer." },
-  { word: "CHARACTER", hint: "Single unit of text." },
-  { word: "CHECKBOX", hint: "UI element for selection." },
-  { word: "CHECKSUM", hint: "Value to check data integrity." },
-  { word: "CIRCUIT", hint: "Path for electricity." },
-  { word: "CIPHER", hint: "Algorithm for encryption." },
-  { word: "CLASS", hint: "Blueprint for objects." },
-  { word: "CLIENT", hint: "Requests services from server." },
-  { word: "CLIPBOARD", hint: "Temporary storage for copy/paste." },
-  { word: "CLOCK", hint: "Regulates CPU speed." },
-  { word: "CLOUD", hint: "Remote server network." },
-  { word: "CLUSTER", hint: "Group of connected computers." },
-  { word: "COAXIAL", hint: "Type of cable." },
-  { word: "CODEBASE", hint: "Collection of source code." },
-  { word: "COLLISION", hint: "Two items mapped to same location." },
-  { word: "COMMAND", hint: "Instruction to a computer." },
-  { word: "COMMENT", hint: "Note in code ignored by compiler." },
-  { word: "COMMIT", hint: "Save changes to repository." },
-  { word: "COMPILER", hint: "Translates source to machine code." },
-  { word: "COMPONENT", hint: "Modular part of a system." },
-  { word: "COMPRESSION", hint: "Reducing file size." },
-  { word: "COMPUTATION", hint: "Calculation." },
-  { word: "CONCATENATE", hint: "Join strings together." },
-  { word: "CONCURRENCY", hint: "Tasks executing in overlapping periods." },
-  { word: "CONFIGURATION", hint: "Arrangement of settings." },
-  { word: "CONNECTION", hint: "Link between devices." },
-  { word: "CONSOLE", hint: "Text-based interface." },
-  { word: "CONSTANT", hint: "Value that does not change." },
-  { word: "CONSTRAINT", hint: "Limitation or restriction." },
-  { word: "CONSTRUCTOR", hint: "Initializes an object." },
-  { word: "CONTAINER", hint: "Holds other components." },
-  { word: "CONTEXT", hint: "Environment/state of execution." },
-  { word: "CONTROLLER", hint: "Directs data flow." },
-  { word: "CONVERSION", hint: "Changing format." },
-  { word: "COOKIE", hint: "Data stored by browser." },
-  { word: "COORDINATE", hint: "Position indicator." },
-  { word: "CORE", hint: "Processing unit." },
-  { word: "CORRUPTION", hint: "Errors in data." },
-  { word: "COUNTER", hint: "Variable that counts." },
-  { word: "COUPLING", hint: "Degree of interdependence." },
-  { word: "COVERAGE", hint: "Code executed during test." },
-  { word: "CRAWLER", hint: "Bot that indexes web pages." },
-  { word: "CREDENTIAL", hint: "Proof of identity." },
-  { word: "CRYPTOGRAPHY", hint: "Secure communication techniques." },
-  { word: "CSS", hint: "Style sheet language." },
-  { word: "CURSOR", hint: "Indicator on screen." },
-  { word: "CYBERNETICS", hint: "Science of communications/control." },
-  { word: "CYLINDER", hint: "Disk drive component." },
-  { word: "DAEMON", hint: "Background process." },
-  { word: "DASHBOARD", hint: "Visual display of data." },
-  { word: "DATABASE", hint: "Organized collection of data." },
-  { word: "DATAGRAM", hint: "Basic transfer unit." },
-  { word: "DEADLOCK", hint: "Processes waiting on each other." },
-  { word: "DEBUGGER", hint: "Tool to find errors." },
-  { word: "DECIMAL", hint: "Base-10 number system." },
-  { word: "DECLARATION", hint: "Defining a variable/function." },
-  { word: "DECODE", hint: "Reverse of encode." },
-  { word: "DECRYPTION", hint: "Unscrambling data." },
-  { word: "DEDICATED", hint: "Reserved for specific use." },
-  { word: "DEFAULT", hint: "Preset setting." },
-  { word: "DEFINITION", hint: "Meaning of a term." },
-  { word: "DELEGATE", hint: "Object acting on behalf of another." },
-  { word: "DELETED", hint: "Removed." },
-  { word: "DELIMITER", hint: "Boundary marker." },
-  { word: "DEPENDENCY", hint: "Relied upon code." },
-  { word: "DEPLOYMENT", hint: "Releasing software." },
-  { word: "DEPRECATED", hint: "Obsolete/discouraged." },
-  { word: "DESKTOP", hint: "Main screen area." },
-  { word: "DESTRUCTOR", hint: "Cleans up object." },
-  { word: "DEVELOPMENT", hint: "Process of creating software." },
-  { word: "DEVICE", hint: "Piece of hardware." },
-  { word: "DIAGNOSTIC", hint: "Identifying problems." },
-  { word: "DIAGRAM", hint: "Visual representation." },
-  { word: "DIALOG", hint: "Popup window." },
-  { word: "DIGITAL", hint: "Using discrete values (0s and 1s)." },
-  { word: "DIMENSION", hint: "Measurement of extent." },
-  { word: "DIRECTIVE", hint: "Instruction to compiler." },
-  { word: "DIRECTORY", hint: "Folder structure." },
-  { word: "DISABLE", hint: "Turn off." },
-  { word: "DISCOVERY", hint: "Finding network devices." },
-  { word: "DISCRETE", hint: "Distinct, separate." },
-  { word: "DISK", hint: "Storage platter." },
-  { word: "DISPLAY", hint: "Screen or monitor." },
-  { word: "DISTRIBUTED", hint: "Shared across multiple systems." },
-  { word: "DNS", hint: "Domain Name System." },
-  { word: "DOCUMENT", hint: "File containing text." },
-  { word: "DOMAIN", hint: "Internet address." },
-  { word: "DOWNLOAD", hint: "Receive data." },
-  { word: "DRIVER", hint: "Software controlling hardware." },
-  { word: "DROPDOWN", hint: "Selection list." },
-  { word: "DYNAMIC", hint: "Changing at runtime." },
-  { word: "EBOOK", hint: "Digital book." },
-  { word: "ECOSYSTEM", hint: "Community of interacting systems." },
-  { word: "EDITION", hint: "Version of software." },
-  { word: "EDITOR", hint: "Tool for modifying text/code." },
-  { word: "EFFECT", hint: "Result of an action." },
-  { word: "EFFICIENCY", hint: "Performance optimization." },
-  { word: "ELEMENT", hint: "Part of a whole." },
-  { word: "EMAIL", hint: "Electronic mail." },
-  { word: "EMBEDDED", hint: "Integrated into a system." },
-  { word: "EMULATION", hint: "Imitating another system." },
-  { word: "ENCAPSULATION", hint: "Bundling data and methods." },
-  { word: "ENCODING", hint: "Converting data format." },
-  { word: "ENCRYPTION", hint: "Securing data." },
-  { word: "ENGINE", hint: "Core processing component." },
-  { word: "ENTERPRISE", hint: "Large-scale business software." },
-  { word: "ENTITY", hint: "Distinct object." },
-  { word: "ENVIRONMENT", hint: "Context where code runs." },
-  { word: "EQUATION", hint: "Mathematical statement." },
-  { word: "ETHERNET", hint: "Wired network standard." },
-  { word: "EVALUATION", hint: "Determining value." },
-  { word: "EVENT", hint: "Action or occurrence." },
-  { word: "EXCEPTION", hint: "Runtime error." },
-  { word: "EXECUTABLE", hint: "Ready to run program." },
-  { word: "EXECUTION", hint: "Running of a program." },
-  { word: "EXPANSION", hint: "Adding capability." },
-  { word: "EXPRESSION", hint: "Code resulting in a value." },
-  { word: "EXTENSION", hint: "Add-on module." },
-  { word: "EXTERNAL", hint: "Outside the system." },
-  { word: "FACTORIAL", hint: "Math operation (!)." },
-  { word: "FAILURE", hint: "Lack of success." },
-  { word: "FALLBACK", hint: "Plan B." },
-  { word: "FEATURE", hint: "Distinct capability." },
-  { word: "FEDERATION", hint: "Group of networks." },
-  { word: "FEEDBACK", hint: "Output returned as input." },
-  { word: "FIBER", hint: "Glass strand for data." },
-  { word: "FIELD", hint: "Data entry area." },
-  { word: "FILE", hint: "Stores data." },
-  { word: "FILTER", hint: "Removes unwanted data." },
-  { word: "FIREWALL", hint: "Network security." },
-  { word: "FIRMWARE", hint: "Permanent software." },
-  { word: "FLAG", hint: "Binary indicator." },
-  { word: "FLASH", hint: "Solid state memory." },
-  { word: "FLOAT", hint: "Decimal number." },
-  { word: "FLOOD", hint: "Network packet overflow." },
-  { word: "FLOPPY", hint: "Old storage disk." },
-  { word: "FLOWCHART", hint: "Diagram of logic." },
-  { word: "FOLDER", hint: "Directory." },
-  { word: "FONT", hint: "Typeface style." },
-  { word: "FOOTER", hint: "Bottom section." },
-  { word: "FOREGROUND", hint: "Active window." },
-  { word: "FORMAT", hint: "Arrangement of data." },
-  { word: "FORMULA", hint: "Calculation rule." },
-  { word: "FORTRAN", hint: "Old programming language." },
-  { word: "FRAMEWORK", hint: "Platform for building apps." },
-  { word: "FREQUENCY", hint: "Rate of recurrence." },
-  { word: "FRONTEND", hint: "User-facing part." },
-  { word: "FUNCTION", hint: "Code block." },
-  { word: "FUTURE", hint: "Value expected later." },
-  { word: "GATEWAY", hint: "Entry point to network." },
-  { word: "GENERATOR", hint: "Produces values." },
-  { word: "GESTURE", hint: "Touchscreen action." },
-  { word: "GIGABYTE", hint: "1024 Megabytes." },
-  { word: "GITHUB", hint: "Code hosting platform." },
-  { word: "GLOBAL", hint: "Accessible everywhere." },
-  { word: "GLYPH", hint: "Visual character representation." },
-  { word: "GOOGLE", hint: "Search giant." },
-  { word: "GOVERNANCE", hint: "Management policies." },
-  { word: "GPU", hint: "Graphics Processing Unit." },
-  { word: "GRADIENT", hint: "Color transition." },
-  { word: "GRAMMAR", hint: "Syntax rules." },
-  { word: "GRAPHIC", hint: "Visual image." },
-  { word: "GRID", hint: "Layout structure." },
-  { word: "GROUPWARE", hint: "Collaborative software." },
-  { word: "GUIDE", hint: "Instruction manual." },
-  { word: "HANDLER", hint: "Manages events." },
-  { word: "HANDSHAKE", hint: "Protocol negotiation." },
-  { word: "HARDWARE", hint: "Physical components." },
-  { word: "HASHING", hint: "One-way mapping." },
-  { word: "HEADER", hint: "Top section/meta-data." },
-  { word: "HEADLESS", hint: "No UI." },
-  { word: "HEAP", hint: "Dynamic memory." },
-  { word: "HEURISTIC", hint: "Problem solving approach." },
-  { word: "HEXADECIMAL", hint: "Base-16." },
-  { word: "HIERARCHY", hint: "Ranked structure." },
-  { word: "HISTORY", hint: "Record of past events." },
-  { word: "HOLOGRAM", hint: "3D image." },
-  { word: "HOMEPAGE", hint: "Main web page." },
-  { word: "HOSTING", hint: "Serving web content." },
-  { word: "HOTSPOT", hint: "Wifi access point." },
-  { word: "HTML", hint: "Web markup language." },
-  { word: "HYBRID", hint: "Mix of two types." },
-  { word: "HYPERLINK", hint: "Reference to data." },
-  { word: "HYPERTEXT", hint: "Linked text." },
-  { word: "ICON", hint: "Symbol." },
-  { word: "IDENTIFIER", hint: "Name of variable." },
-  { word: "IMAGE", hint: "Picture." },
-  { word: "IMMUTABLE", hint: "Cannot change." },
-  { word: "IMPLEMENT", hint: "Put into effect." },
-  { word: "IMPORT", hint: "Bring in data." },
-  { word: "INCIDENT", hint: "Event." },
-  { word: "INCLUDE", hint: "Add code." },
-  { word: "INCREMENT", hint: "Increase by one." },
-  { word: "INDEX", hint: "Position in list." },
-  { word: "INDICATOR", hint: "Shows status." },
-  { word: "INFINITY", hint: "Unbounded value." },
-  { word: "INFORMATION", hint: "Processed data." },
-  { word: "INHERITANCE", hint: "Acquiring properties." },
-  { word: "INJECTION", hint: "Malicious input code." },
-  { word: "INPUT", hint: "Data entering system." },
-  { word: "INSPECTOR", hint: "Debugging tool." },
-  { word: "INSTALLER", hint: "Setup program." },
-  { word: "INSTANCE", hint: "Specific object." },
-  { word: "INSTRUCTION", hint: "Command." },
-  { word: "INTEGER", hint: "Whole number." },
-  { word: "INTEGRATION", hint: "Combining systems." },
-  { word: "INTEGRITY", hint: "Accuracy of data." },
-  { word: "INTELLIGENCE", hint: "Capacity for logic." },
-  { word: "INTERACTION", hint: "User action." },
-  { word: "INTERFACE", hint: "Boundary." },
-  { word: "INTERNET", hint: "Global network." },
-  { word: "INTERPRETER", hint: "Executes code directly." },
-  { word: "INTERRUPT", hint: "Signal to stop." },
-  { word: "INTRANET", hint: "Private network." },
-  { word: "INVALID", hint: "Not correct." },
-  { word: "INVENTORY", hint: "List of assets." },
-  { word: "INVOCATION", hint: "Calling a function." },
-  { word: "ISOLATION", hint: "Separation." },
-  { word: "ITERATION", hint: "Repetition." },
-  { word: "JAVASCRIPT", hint: "Web language." },
-  { word: "JOYSTICK", hint: "Game controller." },
-  { word: "KERNEL", hint: "OS Core." },
-  { word: "KEYBOARD", hint: "Input device." },
-  { word: "KEYWORD", hint: "Reserved word." },
-  { word: "KILOBYTE", hint: "1024 bytes." },
-  { word: "KUBERNETES", hint: "Container orchestration." },
-  { word: "LABEL", hint: "Tag or name." },
-  { word: "LANGUAGE", hint: "System of syntax." },
-  { word: "LAPTOP", hint: "Portable PC." },
-  { word: "LATENCY", hint: "Delay." },
-  { word: "LAYER", hint: "Level of abstraction." },
-  { word: "LAYOUT", hint: "Visual arrangement." },
-  { word: "LEGACY", hint: "Old system." },
-  { word: "LIBRARY", hint: "Code collection." },
-  { word: "LICENSE", hint: "Usage rights." },
-  { word: "LIFECYCLE", hint: "Stages of existence." },
-  { word: "LIGHTWEIGHT", hint: "Low resource use." },
-  { word: "LIMITER", hint: "Restricts value." },
-  { word: "LINEAR", hint: "Sequential." },
-  { word: "LINKER", hint: "Connects object files." },
-  { word: "LINUX", hint: "Open source OS." },
-  { word: "LISTENER", hint: "Waits for event." },
-  { word: "LITERAL", hint: "Fixed value." },
-  { word: "LOADBALANCER", hint: "Distributes traffic." },
-  { word: "LOCALHOST", hint: "This computer." },
-  { word: "LOCATION", hint: "Place." },
-  { word: "LOCKING", hint: "Preventing access." },
-  { word: "LOGGING", hint: "Recording events." },
-  { word: "LOGIC", hint: "Reasoning." },
-  { word: "LOGIN", hint: "Authentication." },
-  { word: "LOOPHOLE", hint: "Flaw." },
-  { word: "MACHINE", hint: "Computer." },
-  { word: "MACRO", hint: "Automated sequence." },
-  { word: "MAGNET", hint: "Attracts metal." },
-  { word: "MAIN", hint: "Entry point." },
-  { word: "MAINTENANCE", hint: "Upkeep." },
-  { word: "MALWARE", hint: "Bad software." },
-  { word: "MANAGEMENT", hint: "Control." },
-  { word: "MANIFEST", hint: "List of contents." },
-  { word: "MARGIN", hint: "Space around." },
-  { word: "MARKUP", hint: "Annotation." },
-  { word: "MASK", hint: "Filter." },
-  { word: "MASTER", hint: "Primary." },
-  { word: "MATRIX", hint: "Grid of values." },
-  { word: "MECHANISM", hint: "Process." },
-  { word: "MEDIA", hint: "Content." },
-  { word: "MEGABYTE", hint: "1024 Kilobytes." },
-  { word: "MEMORY", hint: "RAM." },
-  { word: "MENU", hint: "List of options." },
-  { word: "MESSAGE", hint: "Communication." },
-  { word: "METADATA", hint: "Data about data." },
-  { word: "METHOD", hint: "Function in class." },
-  { word: "METRIC", hint: "Measurement." },
-  { word: "MICROCHIP", hint: "Integrated circuit." },
-  { word: "MICROPHONE", hint: "Audio input." },
-  { word: "MIDDLEWARE", hint: "Bridge software." },
-  { word: "MIGRATION", hint: "Moving data." },
-  { word: "MINING", hint: "Extracting data/crypto." },
-  { word: "MIRROR", hint: "Exact copy." },
-  { word: "MOBILE", hint: "Portable." },
-  { word: "MODEL", hint: "Representation." },
-  { word: "MODEM", hint: "Modulator-demodulator." },
-  { word: "MODULAR", hint: "Composed of parts." },
-  { word: "MODULE", hint: "Unit of code." },
-  { word: "MONITOR", hint: "Display." },
-  { word: "MONOLITH", hint: "Single huge block." },
-  { word: "MOTHERBOARD", hint: "Main circuit board." },
-  { word: "MOUSE", hint: "Pointing device." },
-  { word: "MULTICAST", hint: "One to many." },
-  { word: "MULTIMEDIA", hint: "Audio/Video." },
-  { word: "MULTIPLEX", hint: "Combine signals." },
-  { word: "MUTATION", hint: "Change." },
-  { word: "MUTEX", hint: "Mutual exclusion." },
-  { word: "NAMESPACE", hint: "Scope for names." },
-  { word: "NATIVE", hint: "Built-in." },
-  { word: "NAVIGATION", hint: "Moving through." },
-  { word: "NETWORK", hint: "Connected system." },
-  { word: "NEURAL", hint: "Brain-like." },
-  { word: "NODE", hint: "Point in graph." },
-  { word: "NOISE", hint: "Interference." },
-  { word: "NOTATION", hint: "System of symbols." },
-  { word: "NOTIFICATION", hint: "Alert." },
-  { word: "NULL", hint: "No value." },
-  { word: "NUMBER", hint: "Quantity." },
-  { word: "NUMERIC", hint: "Of numbers." },
-  { word: "OBJECT", hint: "Instance." },
-  { word: "OBSERVABLE", hint: "Can be watched." },
-  { word: "OCTAL", hint: "Base-8." },
-  { word: "OFFSETS", hint: "Displacement." },
-  { word: "OPERAND", hint: "Target of operation." },
-  { word: "OPERATION", hint: "Action." },
-  { word: "OPERATOR", hint: "Symbol for action." },
-  { word: "OPTICAL", hint: "Light-based." },
-  { word: "OPTIMIZATION", hint: "Improvement." },
-  { word: "OPTION", hint: "Choice." },
-  { word: "ORACLE", hint: "Source of truth." },
-  { word: "ORDER", hint: "Sequence." },
-  { word: "ORIENTATION", hint: "Direction." },
-  { word: "OUTPUT", hint: "Result." },
-  { word: "OVERFLOW", hint: "Exceeding limit." },
-  { word: "OVERHEAD", hint: "Extra processing." },
-  { word: "OVERLAY", hint: "Layer on top." },
-  { word: "OVERLOAD", hint: "Too much load." },
-  { word: "OVERRIDE", hint: "Replace method." },
-  { word: "PACKAGE", hint: "Bundle of code." },
-  { word: "PACKET", hint: "Unit of data." },
-  { word: "PADDING", hint: "Space filler." },
-  { word: "PAGINATION", hint: "Dividing into pages." },
-  { word: "PANEL", hint: "Section of UI." },
-  { word: "PARALLEL", hint: "Simultaneous." },
-  { word: "PARAMETER", hint: "Input variable." },
-  { word: "PARENT", hint: "Source/Origin." },
-  { word: "PARITY", hint: "Error check bit." },
-  { word: "PARSING", hint: "Analyzing syntax." },
-  { word: "PARTITION", hint: "Section." },
-  { word: "PASSWORD", hint: "Secret key." },
-  { word: "PATCH", hint: "Fix." },
-  { word: "PATH", hint: "Route to file." },
-  { word: "PATTERN", hint: "Repeated design." },
-  { word: "PAYLOAD", hint: "Carried data." },
-  { word: "PERIPHERAL", hint: "External device." },
-  { word: "PERMISSION", hint: "Authorization." },
-  { word: "PERSISTENCE", hint: "Saving state." },
-  { word: "PHISHING", hint: "Email scam." },
-  { word: "PIXEL", hint: "Picture element." },
-  { word: "PLATFORM", hint: "OS/Environment." },
-  { word: "PLUGIN", hint: "Add-on." },
-  { word: "POINTER", hint: "Memory address ref." },
-  { word: "POLYMORPH", hint: "Many forms." },
-  { word: "POPUP", hint: "New window." },
-  { word: "PORT", hint: "Endpoint." },
-  { word: "PORTAL", hint: "Gateway site." },
-  { word: "POSITION", hint: "Location." },
-  { word: "POWER", hint: "Energy." },
-  { word: "PRECEDENCE", hint: "Order of ops." },
-  { word: "PRECISION", hint: "Accuracy." },
-  { word: "PREDICTION", hint: "Forecast." },
-  { word: "PRELOAD", hint: "Load early." },
-  { word: "PROCESSOR", hint: "CPU." },
-  { word: "PRODUCT", hint: "Result of multiplication." },
-  { word: "PROFILE", hint: "User settings." },
-  { word: "PROGRAM", hint: "Code to run." },
-  { word: "PROGRESS", hint: "Advancement." },
-  { word: "PROJECT", hint: "Task." },
-  { word: "PROMPT", hint: "Ask for input." },
-  { word: "PROPERTY", hint: "Attribute." },
-  { word: "PROTOCOL", hint: "Rules." },
-  { word: "PROTOTYPE", hint: "Original model." },
-  { word: "PROVIDER", hint: "Supplier." },
-  { word: "PROXY", hint: "Intermediary." },
-  { word: "PSEUDO", hint: "Fake." },
-  { word: "PUBLIC", hint: "Open to all." },
-  { word: "PUBLISH", hint: "Make public." },
-  { word: "PYTHON", hint: "Snake/Language." },
-  { word: "QUERY", hint: "Question." },
-  { word: "QUEUE", hint: "Line." },
-  { word: "RADIO", hint: "Wireless transmission." },
-  { word: "RANDOM", hint: "Unpredictable." },
-  { word: "RASTER", hint: "Bitmap." },
-  { word: "RATIO", hint: "Proportion." },
-  { word: "REACT", hint: "JS Library." },
-  { word: "READONLY", hint: "Cannot write." },
-  { word: "REALTIME", hint: "Immediate." },
-  { word: "REBOOT", hint: "Restart." },
-  { word: "RECEIVER", hint: "Gets signal." },
-  { word: "RECURSION", hint: "Self-reference." },
-  { word: "RECYCLE", hint: "Reuse." },
-  { word: "REDUNDANCY", hint: "Backup." },
-  { word: "REFERENCE", hint: "Pointer." },
-  { word: "REFRESH", hint: "Reload." },
-  { word: "REGISTER", hint: "CPU storage." },
-  { word: "REGISTRY", hint: "Database of settings." },
-  { word: "REGULAR", hint: "Standard." },
-  { word: "RELATION", hint: "Connection." },
-  { word: "RELAY", hint: "Pass on." },
-  { word: "RELEASE", hint: "Launch." },
-  { word: "RELOAD", hint: "Load again." },
-  { word: "REMOTE", hint: "Distant." },
-  { word: "RENDER", hint: "Draw." },
-  { word: "REPOSITORY", hint: "Storage place." },
-  { word: "REQUEST", hint: "Ask for." },
-  { word: "REQUIREMENT", hint: "Need." },
-  { word: "RESET", hint: "Set to zero." },
-  { word: "RESOLUTION", hint: "Pixel count." },
-  { word: "RESOURCE", hint: "Asset." },
-  { word: "RESPONSE", hint: "Reply." },
-  { word: "RESTORE", hint: "Bring back." },
-  { word: "RESTRICTION", hint: "Limit." },
-  { word: "RESULT", hint: "Outcome." },
-  { word: "RETRIEVAL", hint: "Getting back." },
-  { word: "RETRY", hint: "Try again." },
-  { word: "RETURN", hint: "Send back." },
-  { word: "REUSABLE", hint: "Can use again." },
-  { word: "REVERSE", hint: "Backwards." },
-  { word: "REVISION", hint: "Edited version." },
-  { word: "ROBOTICS", hint: "Study of robots." },
-  { word: "ROLLBACK", hint: "Revert." },
-  { word: "ROOT", hint: "Top level." },
-  { word: "ROUTER", hint: "Director." },
-  { word: "ROUTINE", hint: "Procedure." },
-  { word: "RUNTIME", hint: "Execution time." },
-  { word: "SAMPLE", hint: "Example." },
-  { word: "SANDBOX", hint: "Test area." },
-  { word: "SATELLITE", hint: "Orbiter." },
-  { word: "SCALABILITY", hint: "Growth potential." },
-  { word: "SCANNER", hint: "Digitizer." },
-  { word: "SCHEDULE", hint: "Plan." },
-  { word: "SCHEMA", hint: "Structure." },
-  { word: "SCHEME", hint: "Plan." },
-  { word: "SCOPE", hint: "Context." },
-  { word: "SCREEN", hint: "Display." },
-  { word: "SCRIPT", hint: "Code file." },
-  { word: "SCROLL", hint: "Move view." },
-  { word: "SDK", hint: "Dev Kit." },
-  { word: "SEARCH", hint: "Find." },
-  { word: "SECTION", hint: "Part." },
-  { word: "SECTOR", hint: "Disk part." },
-  { word: "SECURITY", hint: "Safety." },
-  { word: "SEGMENT", hint: "Part." },
-  { word: "SELECTION", hint: "Choice." },
-  { word: "SELECTOR", hint: "Picker." },
-  { word: "SEMANTICS", hint: "Meaning." },
-  { word: "SEMAPHORE", hint: "Signal." },
-  { word: "SENSOR", hint: "Detector." },
-  { word: "SEQUENCE", hint: "Order." },
-  { word: "SERIAL", hint: "One by one." },
-  { word: "SERVER", hint: "Host." },
-  { word: "SERVICE", hint: "Function." },
-  { word: "SERVLET", hint: "Server applet." },
-  { word: "SESSION", hint: "Visit." },
-  { word: "SETTING", hint: "Option." },
-  { word: "SHADER", hint: "Graphics code." },
-  { word: "SHADOW", hint: "Dark area." },
-  { word: "SHAREWARE", hint: "Trial software." },
-  { word: "SHELL", hint: "Command line." },
-  { word: "SHORTCUT", hint: "Quick way." },
-  { word: "SIGNAL", hint: "Message." },
-  { word: "SIGNATURE", hint: "ID." },
-  { word: "SILICON", hint: "Chip material." },
-  { word: "SIMULATION", hint: "Model." },
-  { word: "SINGLETON", hint: "One instance." },
-  { word: "SITEMAP", hint: "Site structure." },
-  { word: "SKETCH", hint: "Draft." },
-  { word: "SLIDER", hint: "Input bar." },
-  { word: "SMARTPHONE", hint: "Mobile device." },
-  { word: "SNAPSHOT", hint: "Instant copy." },
-  { word: "SOCKET", hint: "Connection point." },
-  { word: "SOFTWARE", hint: "Programs." },
-  { word: "SOLUTION", hint: "Answer." },
-  { word: "SORTING", hint: "Ordering." },
-  { word: "SOURCE", hint: "Origin." },
-  { word: "SPACING", hint: "Gap." },
-  { word: "SPAM", hint: "Junk." },
-  { word: "SPEAKER", hint: "Audio output." },
-  { word: "SPECIFICATION", hint: "Detail." },
-  { word: "SPECTRUM", hint: "Range." },
-  { word: "SPEED", hint: "Velocity." },
-  { word: "SPOOLING", hint: "Queueing." },
-  { word: "SPRINT", hint: "Agile period." },
-  { word: "SQL", hint: "Database language." },
-  { word: "STABLE", hint: "Not crashing." },
-  { word: "STACK", hint: "Pile." },
-  { word: "STANDARD", hint: "Norm." },
-  { word: "STATE", hint: "Condition." },
-  { word: "STATIC", hint: "Unchanging." },
-  { word: "STATISTICS", hint: "Data analysis." },
-  { word: "STATUS", hint: "State." },
-  { word: "STORAGE", hint: "Space." },
-  { word: "STRATEGY", hint: "Plan." },
-  { word: "STREAM", hint: "Flow." },
-  { word: "STRING", hint: "Text." },
-  { word: "STRUCTURE", hint: "Form." },
-  { word: "STYLESHEET", hint: "Design file." },
-  { word: "SUBDOMAIN", hint: "Part of domain." },
-  { word: "SUBNET", hint: "Sub-network." },
-  { word: "SUBROUTINE", hint: "Function." },
-  { word: "SUBSCRIBE", hint: "Sign up." },
-  { word: "SUBSCRIPT", hint: "Small text below." },
-  { word: "SUBSET", hint: "Part of set." },
-  { word: "SUPERCOMPUTER", hint: "Fast PC." },
-  { word: "SUPPORT", hint: "Help." },
-  { word: "SURFACE", hint: "Outside." },
-  { word: "SWITCH", hint: "Toggle/Network device." },
-  { word: "SYMBOL", hint: "Sign." },
-  { word: "SYMMETRIC", hint: "Balanced." },
-  { word: "SYNCHRONIZE", hint: "Match time." },
-  { word: "SYNTAX", hint: "Grammar." },
-  { word: "SYSTEM", hint: "Whole." },
-  { word: "TABLE", hint: "Grid." },
-  { word: "TABLET", hint: "Flat PC." },
-  { word: "TAG", hint: "Label." },
-  { word: "TARGET", hint: "Goal." },
-  { word: "TASK", hint: "Job." },
-  { word: "TECHNOLOGY", hint: "Applied science." },
-  { word: "TELECOM", hint: "Communication." },
-  { word: "TELEMETRY", hint: "Remote measurement." },
-  { word: "TEMPLATE", hint: "Pattern." },
-  { word: "TENSOR", hint: "Math object." },
-  { word: "TERMINAL", hint: "Console." },
-  { word: "TERMINATOR", hint: "End." },
-  { word: "TERRAIN", hint: "Land." },
-  { word: "TESTING", hint: "Checking." },
-  { word: "TEXTURE", hint: "Surface look." },
-  { word: "THREAD", hint: "Process." },
-  { word: "THRESHOLD", hint: "Limit." },
-  { word: "THUMBNAIL", hint: "Small image." },
-  { word: "TIMEOUT", hint: "Time up." },
-  { word: "TIMESTAMP", hint: "Date/Time." },
-  { word: "TITLE", hint: "Name." },
-  { word: "TOGGLE", hint: "Switch." },
-  { word: "TOKEN", hint: "Symbol." },
-  { word: "TOOLBAR", hint: "Menu strip." },
-  { word: "TOOLKIT", hint: "Set of tools." },
-  { word: "TOPOLOGY", hint: "Network shape." },
-  { word: "TOUCH", hint: "Feel." },
-  { word: "TRACKER", hint: "Follower." },
-  { word: "TRAFFIC", hint: "Flow." },
-  { word: "TRANSACTION", hint: "Exchange." },
-  { word: "TRANSFER", hint: "Move." },
-  { word: "TRANSFORM", hint: "Change." },
-  { word: "TRANSISTOR", hint: "Switch." },
-  { word: "TRANSLATION", hint: "Language change." },
-  { word: "TRANSMIT", hint: "Send." },
-  { word: "TRANSPARENT", hint: "Clear." },
-  { word: "TRAVERSAL", hint: "Crossing." },
-  { word: "TRIGGER", hint: "Activator." },
-  { word: "TROUBLESHOOT", hint: "Fix." },
-  { word: "TUPLE", hint: "Set." },
-  { word: "TYPE", hint: "Kind." },
-  { word: "TYPEDEF", hint: "Type definition." },
-  { word: "TYPESCRIPT", hint: "Typed JS." },
-  { word: "UBIQUITOUS", hint: "Everywhere." },
-  { word: "UNICODE", hint: "Text standard." },
-  { word: "UNINSTALL", hint: "Remove." },
-  { word: "UNION", hint: "Joining." },
-  { word: "UNIQUE", hint: "One of a kind." },
-  { word: "UNIT", hint: "One." },
-  { word: "UNITY", hint: "Oneness." },
-  { word: "UNIVERSE", hint: "Everything." },
-  { word: "UNIX", hint: "OS." },
-  { word: "UPDATE", hint: "New version." },
-  { word: "UPGRADE", hint: "Better version." },
-  { word: "UPLOAD", hint: "Send up." },
-  { word: "UPTIME", hint: "Time on." },
-  { word: "URL", hint: "Web address." },
-  { word: "USABILITY", hint: "Ease of use." },
-  { word: "USB", hint: "Connector." },
-  { word: "USER", hint: "Person." },
-  { word: "UTILITY", hint: "Tool." },
-  { word: "VALIDATION", hint: "Check." },
-  { word: "VALUE", hint: "Worth/Data." },
-  { word: "VARIABLE", hint: "Container." },
-  { word: "VECTOR", hint: "Directional magnitude." },
-  { word: "VENDOR", hint: "Seller." },
-  { word: "VERIFICATION", hint: "Proof." },
-  { word: "VERSION", hint: "Edition." },
-  { word: "VERTEX", hint: "Corner." },
-  { word: "VIDEO", hint: "Moving image." },
-  { word: "VIEWPORT", hint: "Visible area." },
-  { word: "VIRTUAL", hint: "Not real." },
-  { word: "VIRUS", hint: "Infection." },
-  { word: "VISIBILITY", hint: "Sight." },
-  { word: "VISION", hint: "Sight." },
-  { word: "VISUAL", hint: "Sight." },
-  { word: "VOICE", hint: "Sound." },
-  { word: "VOLATILE", hint: "Unstable." },
-  { word: "VOLUME", hint: "Loudness/Space." },
-  { word: "VPN", hint: "Private tunnel." },
-  { word: "WAFER", hint: "Silicon slice." },
-  { word: "WAREHOUSE", hint: "Storage." },
-  { word: "WARNING", hint: "Alert." },
-  { word: "WATCHDOG", hint: "Monitor." },
-  { word: "WATERFALL", hint: "Dev model." },
-  { word: "WAVEFORM", hint: "Signal shape." },
-  { word: "WEBCAM", hint: "Camera." },
-  { word: "WEBHOOK", hint: "Callback." },
-  { word: "WEBPAGE", hint: "Site doc." },
-  { word: "WEBSITE", hint: "Domain." },
-  { word: "WIDGET", hint: "UI tool." },
-  { word: "WIFI", hint: "Wireless." },
-  { word: "WINDOW", hint: "Frame." },
-  { word: "WIRELESS", hint: "No cables." },
-  { word: "WIZARD", hint: "Setup guide." },
-  { word: "WORKFLOW", hint: "Process." },
-  { word: "WORKLOAD", hint: "Tasks." },
-  { word: "WORKSPACE", hint: "Area." },
-  { word: "WORKSTATION", hint: "PC." },
-  { word: "WORLD", hint: "Earth." },
-  { word: "WRAPPER", hint: "Container." },
-  { word: "XENON", hint: "Gas." },
-  { word: "XML", hint: "Markup." },
-  { word: "YIELD", hint: "Produce." },
-  { word: "ZERO", hint: "Null." },
-  { word: "ZIP", hint: "Compress." },
-  { word: "ZONE", hint: "Area." },
-  { word: "ZOOM", hint: "Magnify." }
-];
-
-export default function ScrambleGame() {
-  const [currentData, setCurrentData] = useState(null);
-  const [scrambled, setScrambled] = useState("");
-  const [input, setInput] = useState("");
-  const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [message, setMessage] = useState(null); 
-  const [hintLevel, setHintLevel] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  
-  const inputRef = useRef(null);
-
-  const scrambleWord = (word) => {
-    const arr = word.split('');
-    let n = arr.length;
-    while (n > 0) {
-      let i = Math.floor(Math.random() * n--);
-      let tmp = arr[n];
-      arr[n] = arr[i];
-      arr[i] = tmp;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Unscramble</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Babel is required to compile JSX in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "lucide-react": "https://esm.sh/lucide-react@0.292.0"
+      }
     }
-    const res = arr.join('');
-    return res === word ? scrambleWord(word) : res;
-  };
+    </script>
+</head>
+<body class="bg-white">
+    <div id="root"></div>
 
-  const nextLevel = () => {
-    const randomIdx = Math.floor(Math.random() * WORD_BANK.length);
-    const data = WORD_BANK[randomIdx];
-    setCurrentData(data);
-    setScrambled(scrambleWord(data.word));
-    setInput("");
-    setHintLevel(0);
-    setMessage(null);
-    if (inputRef.current) inputRef.current.focus();
-  };
+    <!-- data-type="module" tells Babel to treat this as an ES module (allowing imports) -->
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useRef } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { Shuffle, ArrowRight, Check, Trophy, Flame, Sparkles, Github, Linkedin, RotateCcw } from 'lucide-react';
 
-  useEffect(() => {
-    nextLevel();
-  }, []);
+        const WORD_BANK = [
+          { word: "ABSTRACTION", hint: "Hiding complex details." },
+          { word: "ACCUMULATOR", hint: "Register where arithmetic results are stored." },
+          { word: "ACTIVATION", hint: "Process of making software active." },
+          { word: "ADAPTIVE", hint: "System that changes based on inputs." },
+          { word: "ADDRESS", hint: "Location in memory." },
+          { word: "AGGREGATE", hint: "Collection of items." },
+          { word: "ALGORITHM", hint: "Step-by-step instructions." },
+          { word: "ALLOCATION", hint: "Reserving memory." },
+          { word: "ANALYTICS", hint: "Discovery of patterns in data." },
+          { word: "ANIMATION", hint: "Illusion of motion." },
+          { word: "ANOMALY", hint: "Deviation from the rule." },
+          { word: "ANTIVIRUS", hint: "Software to prevent malware." },
+          { word: "APERTURE", hint: "Opening in a lens." },
+          { word: "APPEND", hint: "Add to the end." },
+          { word: "APPLICATION", hint: "Program designed for end users." },
+          { word: "ARCHITECTURE", hint: "Fundamental structure of a system." },
+          { word: "ARGUMENT", hint: "Value passed to a function." },
+          { word: "ARITHMETIC", hint: "Branch of mathematics." },
+          { word: "ARRAY", hint: "Collection of items at contiguous memory." },
+          { word: "ARTIFICIAL", hint: "Made by humans, not natural." },
+          { word: "ASSEMBLER", hint: "Translates assembly to machine code." },
+          { word: "ASSIGNMENT", hint: "Setting a value to a variable." },
+          { word: "ASYNCHRONOUS", hint: "Events occurring independently." },
+          { word: "ATTRIBUTE", hint: "Property of an object/tag." },
+          { word: "AUTHENTICATION", hint: "Verifying identity." },
+          { word: "AUTOMATION", hint: "Automatic operation." },
+          { word: "AVAILABILITY", hint: "System uptime." },
+          { word: "BACKBONE", hint: "Central part of a network." },
+          { word: "BACKGROUND", hint: "Area behind the main content." },
+          { word: "BACKTRACKING", hint: "Algorithmic technique for solving problems." },
+          { word: "BALANCING", hint: "Distributing workloads." },
+          { word: "BANDWIDTH", hint: "Maximum data transfer rate." },
+          { word: "BASELINE", hint: "Standard for comparison." },
+          { word: "BENCHMARK", hint: "Test to measure performance." },
+          { word: "BIGDATA", hint: "Extremely large data sets." },
+          { word: "BIOMETRIC", hint: "Biological data for ID." },
+          { word: "BITCOIN", hint: "Digital cryptocurrency." },
+          { word: "BLOCKCHAIN", hint: "Distributed ledger technology." },
+          { word: "BLUETOOTH", hint: "Wireless technology standard." },
+          { word: "BOOLEAN", hint: "True or False." },
+          { word: "BOTNET", hint: "Network of infected computers." },
+          { word: "BREADCRUMB", hint: "Navigation aid." },
+          { word: "BROADCAST", hint: "Message to all network nodes." },
+          { word: "BROWSER", hint: "Tool to access the web." },
+          { word: "BUFFER", hint: "Temporary memory storage." },
+          { word: "BYTECODE", hint: "Instruction set for a VM." },
+          { word: "CACHE", hint: "Fast storage for frequent data." },
+          { word: "CALCULATOR", hint: "Device for math operations." },
+          { word: "CALLBACK", hint: "Function passed as an argument." },
+          { word: "CAPACITOR", hint: "Stores electrical energy." },
+          { word: "CAPACITY", hint: "Maximum amount that can be held." },
+          { word: "CELLULAR", hint: "Mobile network technology." },
+          { word: "CERTIFICATE", hint: "Digital document proving identity." },
+          { word: "CHANNEL", hint: "Medium for data transfer." },
+          { word: "CHARACTER", hint: "Single unit of text." },
+          { word: "CHECKBOX", hint: "UI element for selection." },
+          { word: "CHECKSUM", hint: "Value to check data integrity." },
+          { word: "CIRCUIT", hint: "Path for electricity." },
+          { word: "CIPHER", hint: "Algorithm for encryption." },
+          { word: "CLASS", hint: "Blueprint for objects." },
+          { word: "CLIENT", hint: "Requests services from server." },
+          { word: "CLIPBOARD", hint: "Temporary storage for copy/paste." },
+          { word: "CLOCK", hint: "Regulates CPU speed." },
+          { word: "CLOUD", hint: "Remote server network." },
+          { word: "CLUSTER", hint: "Group of connected computers." },
+          { word: "COAXIAL", hint: "Type of cable." },
+          { word: "CODEBASE", hint: "Collection of source code." },
+          { word: "COLLISION", hint: "Two items mapped to same location." },
+          { word: "COMMAND", hint: "Instruction to a computer." },
+          { word: "COMMENT", hint: "Note in code ignored by compiler." },
+          { word: "COMMIT", hint: "Save changes to repository." },
+          { word: "COMPILER", hint: "Translates source to machine code." },
+          { word: "COMPONENT", hint: "Modular part of a system." },
+          { word: "COMPRESSION", hint: "Reducing file size." },
+          { word: "COMPUTATION", hint: "Calculation." },
+          { word: "CONCATENATE", hint: "Join strings together." },
+          { word: "CONCURRENCY", hint: "Tasks executing in overlapping periods." },
+          { word: "CONFIGURATION", hint: "Arrangement of settings." },
+          { word: "CONNECTION", hint: "Link between devices." },
+          { word: "CONSOLE", hint: "Text-based interface." },
+          { word: "CONSTANT", hint: "Value that does not change." },
+          { word: "CONSTRAINT", hint: "Limitation or restriction." },
+          { word: "CONSTRUCTOR", hint: "Initializes an object." },
+          { word: "CONTAINER", hint: "Holds other components." },
+          { word: "CONTEXT", hint: "Environment/state of execution." },
+          { word: "CONTROLLER", hint: "Directs data flow." },
+          { word: "CONVERSION", hint: "Changing format." },
+          { word: "COOKIE", hint: "Data stored by browser." },
+          { word: "COORDINATE", hint: "Position indicator." },
+          { word: "CORE", hint: "Processing unit." },
+          { word: "CORRUPTION", hint: "Errors in data." },
+          { word: "COUNTER", hint: "Variable that counts." },
+          { word: "COUPLING", hint: "Degree of interdependence." },
+          { word: "COVERAGE", hint: "Code executed during test." },
+          { word: "CRAWLER", hint: "Bot that indexes web pages." },
+          { word: "CREDENTIAL", hint: "Proof of identity." },
+          { word: "CRYPTOGRAPHY", hint: "Secure communication techniques." },
+          { word: "CSS", hint: "Style sheet language." },
+          { word: "CURSOR", hint: "Indicator on screen." },
+          { word: "CYBERNETICS", hint: "Science of communications/control." },
+          { word: "CYLINDER", hint: "Disk drive component." },
+          { word: "DAEMON", hint: "Background process." },
+          { word: "DASHBOARD", hint: "Visual display of data." },
+          { word: "DATABASE", hint: "Organized collection of data." },
+          { word: "DATAGRAM", hint: "Basic transfer unit." },
+          { word: "DEADLOCK", hint: "Processes waiting on each other." },
+          { word: "DEBUGGER", hint: "Tool to find errors." },
+          { word: "DECIMAL", hint: "Base-10 number system." },
+          { word: "DECLARATION", hint: "Defining a variable/function." },
+          { word: "DECODE", hint: "Reverse of encode." },
+          { word: "DECRYPTION", hint: "Unscrambling data." },
+          { word: "DEDICATED", hint: "Reserved for specific use." },
+          { word: "DEFAULT", hint: "Preset setting." },
+          { word: "DEFINITION", hint: "Meaning of a term." },
+          { word: "DELEGATE", hint: "Object acting on behalf of another." },
+          { word: "DELETED", hint: "Removed." },
+          { word: "DELIMITER", hint: "Boundary marker." },
+          { word: "DEPENDENCY", hint: "Relied upon code." },
+          { word: "DEPLOYMENT", hint: "Releasing software." },
+          { word: "DEPRECATED", hint: "Obsolete/discouraged." },
+          { word: "DESKTOP", hint: "Main screen area." },
+          { word: "DESTRUCTOR", hint: "Cleans up object." },
+          { word: "DEVELOPMENT", hint: "Process of creating software." },
+          { word: "DEVICE", hint: "Piece of hardware." },
+          { word: "DIAGNOSTIC", hint: "Identifying problems." },
+          { word: "DIAGRAM", hint: "Visual representation." },
+          { word: "DIALOG", hint: "Popup window." },
+          { word: "DIGITAL", hint: "Using discrete values (0s and 1s)." },
+          { word: "DIMENSION", hint: "Measurement of extent." },
+          { word: "DIRECTIVE", hint: "Instruction to compiler." },
+          { word: "DIRECTORY", hint: "Folder structure." },
+          { word: "DISABLE", hint: "Turn off." },
+          { word: "DISCOVERY", hint: "Finding network devices." },
+          { word: "DISCRETE", hint: "Distinct, separate." },
+          { word: "DISK", hint: "Storage platter." },
+          { word: "DISPLAY", hint: "Screen or monitor." },
+          { word: "DISTRIBUTED", hint: "Shared across multiple systems." },
+          { word: "DNS", hint: "Domain Name System." },
+          { word: "DOCUMENT", hint: "File containing text." },
+          { word: "DOMAIN", hint: "Internet address." },
+          { word: "DOWNLOAD", hint: "Receive data." },
+          { word: "DRIVER", hint: "Software controlling hardware." },
+          { word: "DROPDOWN", hint: "Selection list." },
+          { word: "DYNAMIC", hint: "Changing at runtime." },
+          { word: "EBOOK", hint: "Digital book." },
+          { word: "ECOSYSTEM", hint: "Community of interacting systems." },
+          { word: "EDITION", hint: "Version of software." },
+          { word: "EDITOR", hint: "Tool for modifying text/code." },
+          { word: "EFFECT", hint: "Result of an action." },
+          { word: "EFFICIENCY", hint: "Performance optimization." },
+          { word: "ELEMENT", hint: "Part of a whole." },
+          { word: "EMAIL", hint: "Electronic mail." },
+          { word: "EMBEDDED", hint: "Integrated into a system." },
+          { word: "EMULATION", hint: "Imitating another system." },
+          { word: "ENCAPSULATION", hint: "Bundling data and methods." },
+          { word: "ENCODING", hint: "Converting data format." },
+          { word: "ENCRYPTION", hint: "Securing data." },
+          { word: "ENGINE", hint: "Core processing component." },
+          { word: "ENTERPRISE", hint: "Large-scale business software." },
+          { word: "ENTITY", hint: "Distinct object." },
+          { word: "ENVIRONMENT", hint: "Context where code runs." },
+          { word: "EQUATION", hint: "Mathematical statement." },
+          { word: "ETHERNET", hint: "Wired network standard." },
+          { word: "EVALUATION", hint: "Determining value." },
+          { word: "EVENT", hint: "Action or occurrence." },
+          { word: "EXCEPTION", hint: "Runtime error." },
+          { word: "EXECUTABLE", hint: "Ready to run program." },
+          { word: "EXECUTION", hint: "Running of a program." },
+          { word: "EXPANSION", hint: "Adding capability." },
+          { word: "EXPRESSION", hint: "Code resulting in a value." },
+          { word: "EXTENSION", hint: "Add-on module." },
+          { word: "EXTERNAL", hint: "Outside the system." },
+          { word: "FACTORIAL", hint: "Math operation (!)." },
+          { word: "FAILURE", hint: "Lack of success." },
+          { word: "FALLBACK", hint: "Plan B." },
+          { word: "FEATURE", hint: "Distinct capability." },
+          { word: "FEDERATION", hint: "Group of networks." },
+          { word: "FEEDBACK", hint: "Output returned as input." },
+          { word: "FIBER", hint: "Glass strand for data." },
+          { word: "FIELD", hint: "Data entry area." },
+          { word: "FILE", hint: "Stores data." },
+          { word: "FILTER", hint: "Removes unwanted data." },
+          { word: "FIREWALL", hint: "Network security." },
+          { word: "FIRMWARE", hint: "Permanent software." },
+          { word: "FLAG", hint: "Binary indicator." },
+          { word: "FLASH", hint: "Solid state memory." },
+          { word: "FLOAT", hint: "Decimal number." },
+          { word: "FLOOD", hint: "Network packet overflow." },
+          { word: "FLOPPY", hint: "Old storage disk." },
+          { word: "FLOWCHART", hint: "Diagram of logic." },
+          { word: "FOLDER", hint: "Directory." },
+          { word: "FONT", hint: "Typeface style." },
+          { word: "FOOTER", hint: "Bottom section." },
+          { word: "FOREGROUND", hint: "Active window." },
+          { word: "FORMAT", hint: "Arrangement of data." },
+          { word: "FORMULA", hint: "Calculation rule." },
+          { word: "FORTRAN", hint: "Old programming language." },
+          { word: "FRAMEWORK", hint: "Platform for building apps." },
+          { word: "FREQUENCY", hint: "Rate of recurrence." },
+          { word: "FRONTEND", hint: "User-facing part." },
+          { word: "FUNCTION", hint: "Code block." },
+          { word: "FUTURE", hint: "Value expected later." },
+          { word: "GATEWAY", hint: "Entry point to network." },
+          { word: "GENERATOR", hint: "Produces values." },
+          { word: "GESTURE", hint: "Touchscreen action." },
+          { word: "GIGABYTE", hint: "1024 Megabytes." },
+          { word: "GITHUB", hint: "Code hosting platform." },
+          { word: "GLOBAL", hint: "Accessible everywhere." },
+          { word: "GLYPH", hint: "Visual character representation." },
+          { word: "GOOGLE", hint: "Search giant." },
+          { word: "GOVERNANCE", hint: "Management policies." },
+          { word: "GPU", hint: "Graphics Processing Unit." },
+          { word: "GRADIENT", hint: "Color transition." },
+          { word: "GRAMMAR", hint: "Syntax rules." },
+          { word: "GRAPHIC", hint: "Visual image." },
+          { word: "GRID", hint: "Layout structure." },
+          { word: "GROUPWARE", hint: "Collaborative software." },
+          { word: "GUIDE", hint: "Instruction manual." },
+          { word: "HANDLER", hint: "Manages events." },
+          { word: "HANDSHAKE", hint: "Protocol negotiation." },
+          { word: "HARDWARE", hint: "Physical components." },
+          { word: "HASHING", hint: "One-way mapping." },
+          { word: "HEADER", hint: "Top section/meta-data." },
+          { word: "HEADLESS", hint: "No UI." },
+          { word: "HEAP", hint: "Dynamic memory." },
+          { word: "HEURISTIC", hint: "Problem solving approach." },
+          { word: "HEXADECIMAL", hint: "Base-16." },
+          { word: "HIERARCHY", hint: "Ranked structure." },
+          { word: "HISTORY", hint: "Record of past events." },
+          { word: "HOLOGRAM", hint: "3D image." },
+          { word: "HOMEPAGE", hint: "Main web page." },
+          { word: "HOSTING", hint: "Serving web content." },
+          { word: "HOTSPOT", hint: "Wifi access point." },
+          { word: "HTML", hint: "Web markup language." },
+          { word: "HYBRID", hint: "Mix of two types." },
+          { word: "HYPERLINK", hint: "Reference to data." },
+          { word: "HYPERTEXT", hint: "Linked text." },
+          { word: "ICON", hint: "Symbol." },
+          { word: "IDENTIFIER", hint: "Name of variable." },
+          { word: "IMAGE", hint: "Picture." },
+          { word: "IMMUTABLE", hint: "Cannot change." },
+          { word: "IMPLEMENT", hint: "Put into effect." },
+          { word: "IMPORT", hint: "Bring in data." },
+          { word: "INCIDENT", hint: "Event." },
+          { word: "INCLUDE", hint: "Add code." },
+          { word: "INCREMENT", hint: "Increase by one." },
+          { word: "INDEX", hint: "Position in list." },
+          { word: "INDICATOR", hint: "Shows status." },
+          { word: "INFINITY", hint: "Unbounded value." },
+          { word: "INFORMATION", hint: "Processed data." },
+          { word: "INHERITANCE", hint: "Acquiring properties." },
+          { word: "INJECTION", hint: "Malicious input code." },
+          { word: "INPUT", hint: "Data entering system." },
+          { word: "INSPECTOR", hint: "Debugging tool." },
+          { word: "INSTALLER", hint: "Setup program." },
+          { word: "INSTANCE", hint: "Specific object." },
+          { word: "INSTRUCTION", hint: "Command." },
+          { word: "INTEGER", hint: "Whole number." },
+          { word: "INTEGRATION", hint: "Combining systems." },
+          { word: "INTEGRITY", hint: "Accuracy of data." },
+          { word: "INTELLIGENCE", hint: "Capacity for logic." },
+          { word: "INTERACTION", hint: "User action." },
+          { word: "INTERFACE", hint: "Boundary." },
+          { word: "INTERNET", hint: "Global network." },
+          { word: "INTERPRETER", hint: "Executes code directly." },
+          { word: "INTERRUPT", hint: "Signal to stop." },
+          { word: "INTRANET", hint: "Private network." },
+          { word: "INVALID", hint: "Not correct." },
+          { word: "INVENTORY", hint: "List of assets." },
+          { word: "INVOCATION", hint: "Calling a function." },
+          { word: "ISOLATION", hint: "Separation." },
+          { word: "ITERATION", hint: "Repetition." },
+          { word: "JAVASCRIPT", hint: "Web language." },
+          { word: "JOYSTICK", hint: "Game controller." },
+          { word: "KERNEL", hint: "OS Core." },
+          { word: "KEYBOARD", hint: "Input device." },
+          { word: "KEYWORD", hint: "Reserved word." },
+          { word: "KILOBYTE", hint: "1024 bytes." },
+          { word: "KUBERNETES", hint: "Container orchestration." },
+          { word: "LABEL", hint: "Tag or name." },
+          { word: "LANGUAGE", hint: "System of syntax." },
+          { word: "LAPTOP", hint: "Portable PC." },
+          { word: "LATENCY", hint: "Delay." },
+          { word: "LAYER", hint: "Level of abstraction." },
+          { word: "LAYOUT", hint: "Visual arrangement." },
+          { word: "LEGACY", hint: "Old system." },
+          { word: "LIBRARY", hint: "Code collection." },
+          { word: "LICENSE", hint: "Usage rights." },
+          { word: "LIFECYCLE", hint: "Stages of existence." },
+          { word: "LIGHTWEIGHT", hint: "Low resource use." },
+          { word: "LIMITER", hint: "Restricts value." },
+          { word: "LINEAR", hint: "Sequential." },
+          { word: "LINKER", hint: "Connects object files." },
+          { word: "LINUX", hint: "Open source OS." },
+          { word: "LISTENER", hint: "Waits for event." },
+          { word: "LITERAL", hint: "Fixed value." },
+          { word: "LOADBALANCER", hint: "Distributes traffic." },
+          { word: "LOCALHOST", hint: "This computer." },
+          { word: "LOCATION", hint: "Place." },
+          { word: "LOCKING", hint: "Preventing access." },
+          { word: "LOGGING", hint: "Recording events." },
+          { word: "LOGIC", hint: "Reasoning." },
+          { word: "LOGIN", hint: "Authentication." },
+          { word: "LOOPHOLE", hint: "Flaw." },
+          { word: "MACHINE", hint: "Computer." },
+          { word: "MACRO", hint: "Automated sequence." },
+          { word: "MAGNET", hint: "Attracts metal." },
+          { word: "MAIN", hint: "Entry point." },
+          { word: "MAINTENANCE", hint: "Upkeep." },
+          { word: "MALWARE", hint: "Bad software." },
+          { word: "MANAGEMENT", hint: "Control." },
+          { word: "MANIFEST", hint: "List of contents." },
+          { word: "MARGIN", hint: "Space around." },
+          { word: "MARKUP", hint: "Annotation." },
+          { word: "MASK", hint: "Filter." },
+          { word: "MASTER", hint: "Primary." },
+          { word: "MATRIX", hint: "Grid of values." },
+          { word: "MECHANISM", hint: "Process." },
+          { word: "MEDIA", hint: "Content." },
+          { word: "MEGABYTE", hint: "1024 Kilobytes." },
+          { word: "MEMORY", hint: "RAM." },
+          { word: "MENU", hint: "List of options." },
+          { word: "MESSAGE", hint: "Communication." },
+          { word: "METADATA", hint: "Data about data." },
+          { word: "METHOD", hint: "Function in class." },
+          { word: "METRIC", hint: "Measurement." },
+          { word: "MICROCHIP", hint: "Integrated circuit." },
+          { word: "MICROPHONE", hint: "Audio input." },
+          { word: "MIDDLEWARE", hint: "Bridge software." },
+          { word: "MIGRATION", hint: "Moving data." },
+          { word: "MINING", hint: "Extracting data/crypto." },
+          { word: "MIRROR", hint: "Exact copy." },
+          { word: "MOBILE", hint: "Portable." },
+          { word: "MODEL", hint: "Representation." },
+          { word: "MODEM", hint: "Modulator-demodulator." },
+          { word: "MODULAR", hint: "Composed of parts." },
+          { word: "MODULE", hint: "Unit of code." },
+          { word: "MONITOR", hint: "Display." },
+          { word: "MONOLITH", hint: "Single huge block." },
+          { word: "MOTHERBOARD", hint: "Main circuit board." },
+          { word: "MOUSE", hint: "Pointing device." },
+          { word: "MULTICAST", hint: "One to many." },
+          { word: "MULTIMEDIA", hint: "Audio/Video." },
+          { word: "MULTIPLEX", hint: "Combine signals." },
+          { word: "MUTATION", hint: "Change." },
+          { word: "MUTEX", hint: "Mutual exclusion." },
+          { word: "NAMESPACE", hint: "Scope for names." },
+          { word: "NATIVE", hint: "Built-in." },
+          { word: "NAVIGATION", hint: "Moving through." },
+          { word: "NETWORK", hint: "Connected system." },
+          { word: "NEURAL", hint: "Brain-like." },
+          { word: "NODE", hint: "Point in graph." },
+          { word: "NOISE", hint: "Interference." },
+          { word: "NOTATION", hint: "System of symbols." },
+          { word: "NOTIFICATION", hint: "Alert." },
+          { word: "NULL", hint: "No value." },
+          { word: "NUMBER", hint: "Quantity." },
+          { word: "NUMERIC", hint: "Of numbers." },
+          { word: "OBJECT", hint: "Instance." },
+          { word: "OBSERVABLE", hint: "Can be watched." },
+          { word: "OCTAL", hint: "Base-8." },
+          { word: "OFFSETS", hint: "Displacement." },
+          { word: "OPERAND", hint: "Target of operation." },
+          { word: "OPERATION", hint: "Action." },
+          { word: "OPERATOR", hint: "Symbol for action." },
+          { word: "OPTICAL", hint: "Light-based." },
+          { word: "OPTIMIZATION", hint: "Improvement." },
+          { word: "OPTION", hint: "Choice." },
+          { word: "ORACLE", hint: "Source of truth." },
+          { word: "ORDER", hint: "Sequence." },
+          { word: "ORIENTATION", hint: "Direction." },
+          { word: "OUTPUT", hint: "Result." },
+          { word: "OVERFLOW", hint: "Exceeding limit." },
+          { word: "OVERHEAD", hint: "Extra processing." },
+          { word: "OVERLAY", hint: "Layer on top." },
+          { word: "OVERLOAD", hint: "Too much load." },
+          { word: "OVERRIDE", hint: "Replace method." },
+          { word: "PACKAGE", hint: "Bundle of code." },
+          { word: "PACKET", hint: "Unit of data." },
+          { word: "PADDING", hint: "Space filler." },
+          { word: "PAGINATION", hint: "Dividing into pages." },
+          { word: "PANEL", hint: "Section of UI." },
+          { word: "PARALLEL", hint: "Simultaneous." },
+          { word: "PARAMETER", hint: "Input variable." },
+          { word: "PARENT", hint: "Source/Origin." },
+          { word: "PARITY", hint: "Error check bit." },
+          { word: "PARSING", hint: "Analyzing syntax." },
+          { word: "PARTITION", hint: "Section." },
+          { word: "PASSWORD", hint: "Secret key." },
+          { word: "PATCH", hint: "Fix." },
+          { word: "PATH", hint: "Route to file." },
+          { word: "PATTERN", hint: "Repeated design." },
+          { word: "PAYLOAD", hint: "Carried data." },
+          { word: "PERIPHERAL", hint: "External device." },
+          { word: "PERMISSION", hint: "Authorization." },
+          { word: "PERSISTENCE", hint: "Saving state." },
+          { word: "PHISHING", hint: "Email scam." },
+          { word: "PIXEL", hint: "Picture element." },
+          { word: "PLATFORM", hint: "OS/Environment." },
+          { word: "PLUGIN", hint: "Add-on." },
+          { word: "POINTER", hint: "Memory address ref." },
+          { word: "POLYMORPH", hint: "Many forms." },
+          { word: "POPUP", hint: "New window." },
+          { word: "PORT", hint: "Endpoint." },
+          { word: "PORTAL", hint: "Gateway site." },
+          { word: "POSITION", hint: "Location." },
+          { word: "POWER", hint: "Energy." },
+          { word: "PRECEDENCE", hint: "Order of ops." },
+          { word: "PRECISION", hint: "Accuracy." },
+          { word: "PREDICTION", hint: "Forecast." },
+          { word: "PRELOAD", hint: "Load early." },
+          { word: "PROCESSOR", hint: "CPU." },
+          { word: "PRODUCT", hint: "Result of multiplication." },
+          { word: "PROFILE", hint: "User settings." },
+          { word: "PROGRAM", hint: "Code to run." },
+          { word: "PROGRESS", hint: "Advancement." },
+          { word: "PROJECT", hint: "Task." },
+          { word: "PROMPT", hint: "Ask for input." },
+          { word: "PROPERTY", hint: "Attribute." },
+          { word: "PROTOCOL", hint: "Rules." },
+          { word: "PROTOTYPE", hint: "Original model." },
+          { word: "PROVIDER", hint: "Supplier." },
+          { word: "PROXY", hint: "Intermediary." },
+          { word: "PSEUDO", hint: "Fake." },
+          { word: "PUBLIC", hint: "Open to all." },
+          { word: "PUBLISH", hint: "Make public." },
+          { word: "PYTHON", hint: "Snake/Language." },
+          { word: "QUERY", hint: "Question." },
+          { word: "QUEUE", hint: "Line." },
+          { word: "RADIO", hint: "Wireless transmission." },
+          { word: "RANDOM", hint: "Unpredictable." },
+          { word: "RASTER", hint: "Bitmap." },
+          { word: "RATIO", hint: "Proportion." },
+          { word: "REACT", hint: "JS Library." },
+          { word: "READONLY", hint: "Cannot write." },
+          { word: "REALTIME", hint: "Immediate." },
+          { word: "REBOOT", hint: "Restart." },
+          { word: "RECEIVER", hint: "Gets signal." },
+          { word: "RECURSION", hint: "Self-reference." },
+          { word: "RECYCLE", hint: "Reuse." },
+          { word: "REDUNDANCY", hint: "Backup." },
+          { word: "REFERENCE", hint: "Pointer." },
+          { word: "REFRESH", hint: "Reload." },
+          { word: "REGISTER", hint: "CPU storage." },
+          { word: "REGISTRY", hint: "Database of settings." },
+          { word: "REGULAR", hint: "Standard." },
+          { word: "RELATION", hint: "Connection." },
+          { word: "RELAY", hint: "Pass on." },
+          { word: "RELEASE", hint: "Launch." },
+          { word: "RELOAD", hint: "Load again." },
+          { word: "REMOTE", hint: "Distant." },
+          { word: "RENDER", hint: "Draw." },
+          { word: "REPOSITORY", hint: "Storage place." },
+          { word: "REQUEST", hint: "Ask for." },
+          { word: "REQUIREMENT", hint: "Need." },
+          { word: "RESET", hint: "Set to zero." },
+          { word: "RESOLUTION", hint: "Pixel count." },
+          { word: "RESOURCE", hint: "Asset." },
+          { word: "RESPONSE", hint: "Reply." },
+          { word: "RESTORE", hint: "Bring back." },
+          { word: "RESTRICTION", hint: "Limit." },
+          { word: "RESULT", hint: "Outcome." },
+          { word: "RETRIEVAL", hint: "Getting back." },
+          { word: "RETRY", hint: "Try again." },
+          { word: "RETURN", hint: "Send back." },
+          { word: "REUSABLE", hint: "Can use again." },
+          { word: "REVERSE", hint: "Backwards." },
+          { word: "REVISION", hint: "Edited version." },
+          { word: "ROBOTICS", hint: "Study of robots." },
+          { word: "ROLLBACK", hint: "Revert." },
+          { word: "ROOT", hint: "Top level." },
+          { word: "ROUTER", hint: "Director." },
+          { word: "ROUTINE", hint: "Procedure." },
+          { word: "RUNTIME", hint: "Execution time." },
+          { word: "SAMPLE", hint: "Example." },
+          { word: "SANDBOX", hint: "Test area." },
+          { word: "SATELLITE", hint: "Orbiter." },
+          { word: "SCALABILITY", hint: "Growth potential." },
+          { word: "SCANNER", hint: "Digitizer." },
+          { word: "SCHEDULE", hint: "Plan." },
+          { word: "SCHEMA", hint: "Structure." },
+          { word: "SCHEME", hint: "Plan." },
+          { word: "SCOPE", hint: "Context." },
+          { word: "SCREEN", hint: "Display." },
+          { word: "SCRIPT", hint: "Code file." },
+          { word: "SCROLL", hint: "Move view." },
+          { word: "SDK", hint: "Dev Kit." },
+          { word: "SEARCH", hint: "Find." },
+          { word: "SECTION", hint: "Part." },
+          { word: "SECTOR", hint: "Disk part." },
+          { word: "SECURITY", hint: "Safety." },
+          { word: "SEGMENT", hint: "Part." },
+          { word: "SELECTION", hint: "Choice." },
+          { word: "SELECTOR", hint: "Picker." },
+          { word: "SEMANTICS", hint: "Meaning." },
+          { word: "SEMAPHORE", hint: "Signal." },
+          { word: "SENSOR", hint: "Detector." },
+          { word: "SEQUENCE", hint: "Order." },
+          { word: "SERIAL", hint: "One by one." },
+          { word: "SERVER", hint: "Host." },
+          { word: "SERVICE", hint: "Function." },
+          { word: "SERVLET", hint: "Server applet." },
+          { word: "SESSION", hint: "Visit." },
+          { word: "SETTING", hint: "Option." },
+          { word: "SHADER", hint: "Graphics code." },
+          { word: "SHADOW", hint: "Dark area." },
+          { word: "SHAREWARE", hint: "Trial software." },
+          { word: "SHELL", hint: "Command line." },
+          { word: "SHORTCUT", hint: "Quick way." },
+          { word: "SIGNAL", hint: "Message." },
+          { word: "SIGNATURE", hint: "ID." },
+          { word: "SILICON", hint: "Chip material." },
+          { word: "SIMULATION", hint: "Model." },
+          { word: "SINGLETON", hint: "One instance." },
+          { word: "SITEMAP", hint: "Site structure." },
+          { word: "SKETCH", hint: "Draft." },
+          { word: "SLIDER", hint: "Input bar." },
+          { word: "SMARTPHONE", hint: "Mobile device." },
+          { word: "SNAPSHOT", hint: "Instant copy." },
+          { word: "SOCKET", hint: "Connection point." },
+          { word: "SOFTWARE", hint: "Programs." },
+          { word: "SOLUTION", hint: "Answer." },
+          { word: "SORTING", hint: "Ordering." },
+          { word: "SOURCE", hint: "Origin." },
+          { word: "SPACING", hint: "Gap." },
+          { word: "SPAM", hint: "Junk." },
+          { word: "SPEAKER", hint: "Audio output." },
+          { word: "SPECIFICATION", hint: "Detail." },
+          { word: "SPECTRUM", hint: "Range." },
+          { word: "SPEED", hint: "Velocity." },
+          { word: "SPOOLING", hint: "Queueing." },
+          { word: "SPRINT", hint: "Agile period." },
+          { word: "SQL", hint: "Database language." },
+          { word: "STABLE", hint: "Not crashing." },
+          { word: "STACK", hint: "Pile." },
+          { word: "STANDARD", hint: "Norm." },
+          { word: "STATE", hint: "Condition." },
+          { word: "STATIC", hint: "Unchanging." },
+          { word: "STATISTICS", hint: "Data analysis." },
+          { word: "STATUS", hint: "State." },
+          { word: "STORAGE", hint: "Space." },
+          { word: "STRATEGY", hint: "Plan." },
+          { word: "STREAM", hint: "Flow." },
+          { word: "STRING", hint: "Text." },
+          { word: "STRUCTURE", hint: "Form." },
+          { word: "STYLESHEET", hint: "Design file." },
+          { word: "SUBDOMAIN", hint: "Part of domain." },
+          { word: "SUBNET", hint: "Sub-network." },
+          { word: "SUBROUTINE", hint: "Function." },
+          { word: "SUBSCRIBE", hint: "Sign up." },
+          { word: "SUBSCRIPT", hint: "Small text below." },
+          { word: "SUBSET", hint: "Part of set." },
+          { word: "SUPERCOMPUTER", hint: "Fast PC." },
+          { word: "SUPPORT", hint: "Help." },
+          { word: "SURFACE", hint: "Outside." },
+          { word: "SWITCH", hint: "Toggle/Network device." },
+          { word: "SYMBOL", hint: "Sign." },
+          { word: "SYMMETRIC", hint: "Balanced." },
+          { word: "SYNCHRONIZE", hint: "Match time." },
+          { word: "SYNTAX", hint: "Grammar." },
+          { word: "SYSTEM", hint: "Whole." },
+          { word: "TABLE", hint: "Grid." },
+          { word: "TABLET", hint: "Flat PC." },
+          { word: "TAG", hint: "Label." },
+          { word: "TARGET", hint: "Goal." },
+          { word: "TASK", hint: "Job." },
+          { word: "TECHNOLOGY", hint: "Applied science." },
+          { word: "TELECOM", hint: "Communication." },
+          { word: "TELEMETRY", hint: "Remote measurement." },
+          { word: "TEMPLATE", hint: "Pattern." },
+          { word: "TENSOR", hint: "Math object." },
+          { word: "TERMINAL", hint: "Console." },
+          { word: "TERMINATOR", hint: "End." },
+          { word: "TERRAIN", hint: "Land." },
+          { word: "TESTING", hint: "Checking." },
+          { word: "TEXTURE", hint: "Surface look." },
+          { word: "THREAD", hint: "Process." },
+          { word: "THRESHOLD", hint: "Limit." },
+          { word: "THUMBNAIL", hint: "Small image." },
+          { word: "TIMEOUT", hint: "Time up." },
+          { word: "TIMESTAMP", hint: "Date/Time." },
+          { word: "TITLE", hint: "Name." },
+          { word: "TOGGLE", hint: "Switch." },
+          { word: "TOKEN", hint: "Symbol." },
+          { word: "TOOLBAR", hint: "Menu strip." },
+          { word: "TOOLKIT", hint: "Set of tools." },
+          { word: "TOPOLOGY", hint: "Network shape." },
+          { word: "TOUCH", hint: "Feel." },
+          { word: "TRACKER", hint: "Follower." },
+          { word: "TRAFFIC", hint: "Flow." },
+          { word: "TRANSACTION", hint: "Exchange." },
+          { word: "TRANSFER", hint: "Move." },
+          { word: "TRANSFORM", hint: "Change." },
+          { word: "TRANSISTOR", hint: "Switch." },
+          { word: "TRANSLATION", hint: "Language change." },
+          { word: "TRANSMIT", hint: "Send." },
+          { word: "TRANSPARENT", hint: "Clear." },
+          { word: "TRAVERSAL", hint: "Crossing." },
+          { word: "TRIGGER", hint: "Activator." },
+          { word: "TROUBLESHOOT", hint: "Fix." },
+          { word: "TUPLE", hint: "Set." },
+          { word: "TYPE", hint: "Kind." },
+          { word: "TYPEDEF", hint: "Type definition." },
+          { word: "TYPESCRIPT", hint: "Typed JS." },
+          { word: "UBIQUITOUS", hint: "Everywhere." },
+          { word: "UNICODE", hint: "Text standard." },
+          { word: "UNINSTALL", hint: "Remove." },
+          { word: "UNION", hint: "Joining." },
+          { word: "UNIQUE", hint: "One of a kind." },
+          { word: "UNIT", hint: "One." },
+          { word: "UNITY", hint: "Oneness." },
+          { word: "UNIVERSE", hint: "Everything." },
+          { word: "UNIX", hint: "OS." },
+          { word: "UPDATE", hint: "New version." },
+          { word: "UPGRADE", hint: "Better version." },
+          { word: "UPLOAD", hint: "Send up." },
+          { word: "UPTIME", hint: "Time on." },
+          { word: "URL", hint: "Web address." },
+          { word: "USABILITY", hint: "Ease of use." },
+          { word: "USB", hint: "Connector." },
+          { word: "USER", hint: "Person." },
+          { word: "UTILITY", hint: "Tool." },
+          { word: "VALIDATION", hint: "Check." },
+          { word: "VALUE", hint: "Worth/Data." },
+          { word: "VARIABLE", hint: "Container." },
+          { word: "VECTOR", hint: "Directional magnitude." },
+          { word: "VENDOR", hint: "Seller." },
+          { word: "VERIFICATION", hint: "Proof." },
+          { word: "VERSION", hint: "Edition." },
+          { word: "VERTEX", hint: "Corner." },
+          { word: "VIDEO", hint: "Moving image." },
+          { word: "VIEWPORT", hint: "Visible area." },
+          { word: "VIRTUAL", hint: "Not real." },
+          { word: "VIRUS", hint: "Infection." },
+          { word: "VISIBILITY", hint: "Sight." },
+          { word: "VISION", hint: "Sight." },
+          { word: "VISUAL", hint: "Sight." },
+          { word: "VOICE", hint: "Sound." },
+          { word: "VOLATILE", hint: "Unstable." },
+          { word: "VOLUME", hint: "Loudness/Space." },
+          { word: "VPN", hint: "Private tunnel." },
+          { word: "WAFER", hint: "Silicon slice." },
+          { word: "WAREHOUSE", hint: "Storage." },
+          { word: "WARNING", hint: "Alert." },
+          { word: "WATCHDOG", hint: "Monitor." },
+          { word: "WATERFALL", hint: "Dev model." },
+          { word: "WAVEFORM", hint: "Signal shape." },
+          { word: "WEBCAM", hint: "Camera." },
+          { word: "WEBHOOK", hint: "Callback." },
+          { word: "WEBPAGE", hint: "Site doc." },
+          { word: "WEBSITE", hint: "Domain." },
+          { word: "WIDGET", hint: "UI tool." },
+          { word: "WIFI", hint: "Wireless." },
+          { word: "WINDOW", hint: "Frame." },
+          { word: "WIRELESS", hint: "No cables." },
+          { word: "WIZARD", hint: "Setup guide." },
+          { word: "WORKFLOW", hint: "Process." },
+          { word: "WORKLOAD", hint: "Tasks." },
+          { word: "WORKSPACE", hint: "Area." },
+          { word: "WORKSTATION", hint: "PC." },
+          { word: "WORLD", hint: "Earth." },
+          { word: "WRAPPER", hint: "Container." },
+          { word: "XENON", hint: "Gas." },
+          { word: "XML", hint: "Markup." },
+          { word: "YIELD", hint: "Produce." },
+          { word: "ZERO", hint: "Null." },
+          { word: "ZIP", hint: "Compress." },
+          { word: "ZONE", hint: "Area." },
+          { word: "ZOOM", hint: "Magnify." }
+        ];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!currentData || isAnimating) return;
-
-    if (input.toUpperCase().trim() === currentData.word) {
-      setScore(s => s + 10 + (streak * 2));
-      setStreak(s => s + 1);
-      setMessage({ text: "Correct", type: 'success' });
-      setIsAnimating(true);
-      setTimeout(() => {
-        setIsAnimating(false);
-        nextLevel();
-      }, 800);
-    } else {
-      setStreak(0);
-      setMessage({ text: "Try again", type: 'error' });
-      setIsAnimating(true);
-      setTimeout(() => {
-        setIsAnimating(false);
-        setMessage(null);
-      }, 1000);
-    }
-  };
-
-  const handleSkip = () => {
-    setStreak(0);
-    setMessage({ text: currentData.word, type: 'info' });
-    setIsAnimating(true);
-    setTimeout(() => {
-      setIsAnimating(false);
-      nextLevel();
-    }, 1500);
-  };
-
-  const handleShuffle = () => {
-    if (currentData) {
-      setScrambled(scrambleWord(currentData.word));
-    }
-  };
-
-  const handleHint = () => {
-    if (hintLevel >= 2) return;
-    setScore(s => Math.max(0, s - 5));
-    setHintLevel(h => h + 1);
-  };
-
-  if (!currentData) return <div className="flex h-screen items-center justify-center bg-gray-50 text-gray-400">Loading...</div>;
-
-  return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-100 selection:text-blue-900 flex flex-col">
-       {/* Top Bar - Minimal */}
-       <header className="w-full max-w-3xl mx-auto p-6 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">W</div>
-             <span className="font-semibold tracking-tight text-lg text-gray-800">Word Unscramble</span>
-          </div>
-          <div className="flex items-center gap-6 text-sm font-medium text-gray-600">
-             <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full">
-                <Trophy className="w-4 h-4 text-gray-500" />
-                <span>{score}</span>
-             </div>
-             <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full">
-                <Flame className={`w-4 h-4 ${streak > 0 ? 'text-orange-500 fill-orange-500' : 'text-gray-400'}`} />
-                <span>{streak}</span>
-             </div>
-          </div>
-       </header>
-
-       {/* Main Game Container */}
-       <main className="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-2xl mx-auto">
+        function ScrambleGame() {
+          const [currentData, setCurrentData] = useState(null);
+          const [scrambled, setScrambled] = useState("");
+          const [input, setInput] = useState("");
+          const [score, setScore] = useState(0);
+          const [streak, setStreak] = useState(0);
+          const [message, setMessage] = useState(null); 
+          const [hintLevel, setHintLevel] = useState(0);
+          const [isAnimating, setIsAnimating] = useState(false);
           
-          {/* Status Message Area - Fixed height to prevent layout shift */}
-          <div className="h-12 flex items-center justify-center mb-6">
-             {message && (
-                <div className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-sm border
-                  ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-100' : 
-                    message.type === 'error' ? 'bg-red-50 text-red-700 border-red-100' : 
-                    'bg-blue-50 text-blue-700 border-blue-100'}`}>
-                   {message.type === 'success' && <Check className="w-4 h-4" />}
-                   {message.text}
-                </div>
-             )}
-          </div>
+          const inputRef = useRef(null);
 
-          {/* The Word Display */}
-          <div className="relative w-full text-center py-8">
-             <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 font-mono">
-                {scrambled}
-             </h1>
-             
-             {/* Hints */}
-             <div className="mt-8 h-8 flex items-center justify-center gap-3">
-                {hintLevel >= 1 && (
-                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                      Starts with <strong className="ml-1 text-gray-900">{currentData.word[0]}</strong>
-                   </span>
-                )}
-                {hintLevel >= 2 && (
-                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 animate-in fade-in">
-                      {currentData.hint}
-                   </span>
-                )}
-             </div>
-          </div>
+          const scrambleWord = (word) => {
+            const arr = word.split('');
+            let n = arr.length;
+            while (n > 0) {
+              let i = Math.floor(Math.random() * n--);
+              let tmp = arr[n];
+              arr[n] = arr[i];
+              arr[i] = tmp;
+            }
+            const res = arr.join('');
+            return res === word ? scrambleWord(word) : res;
+          };
 
-          {/* Input Area */}
-          <form onSubmit={handleSubmit} className="w-full max-w-md relative mt-10 group">
-             <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="block w-full text-center text-3xl font-medium bg-transparent border-b-2 border-gray-200 focus:border-blue-600 focus:outline-none py-4 transition-colors placeholder:text-gray-200 uppercase tracking-widest text-gray-800"
-                placeholder="TYPE HERE"
-                autoFocus
-                maxLength={20}
-                autoComplete="off"
-             />
-             <div className="absolute right-0 top-0 bottom-0 flex items-center">
-                <button
-                   type="submit" 
-                   disabled={!input}
-                   className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-0 disabled:translate-x-2 transition-all duration-300 shadow-lg shadow-blue-600/20 active:scale-95"
-                >
-                   <ArrowRight className="w-5 h-5" />
-                </button>
-             </div>
-          </form>
+          const nextLevel = () => {
+            const randomIdx = Math.floor(Math.random() * WORD_BANK.length);
+            const data = WORD_BANK[randomIdx];
+            setCurrentData(data);
+            setScrambled(scrambleWord(data.word));
+            setInput("");
+            setHintLevel(0);
+            setMessage(null);
+            if (inputRef.current) inputRef.current.focus();
+          };
 
-          {/* Controls - Minimal Icon buttons */}
-          <div className="flex items-center gap-10 mt-16">
-             <button onClick={handleShuffle} className="flex flex-col items-center gap-2 group">
-                <div className="p-3.5 rounded-2xl bg-gray-50 text-gray-500 group-hover:bg-gray-100 group-hover:text-gray-900 transition-all border border-transparent group-hover:border-gray-200">
-                   <Shuffle className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-600 transition-colors">Shuffle</span>
-             </button>
+          useEffect(() => {
+            nextLevel();
+          }, []);
 
-             <button onClick={handleHint} disabled={hintLevel >= 2} className="flex flex-col items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed">
-                <div className="p-3.5 rounded-2xl bg-gray-50 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all border border-transparent group-hover:border-blue-100">
-                   <Sparkles className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-600 transition-colors">Hint</span>
-             </button>
+          const handleSubmit = (e) => {
+            e.preventDefault();
+            if (!currentData || isAnimating) return;
 
-             <button onClick={handleSkip} className="flex flex-col items-center gap-2 group">
-                <div className="p-3.5 rounded-2xl bg-gray-50 text-gray-500 group-hover:bg-red-50 group-hover:text-red-600 transition-all border border-transparent group-hover:border-red-100">
-                   <RotateCcw className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-600 transition-colors">Skip</span>
-             </button>
-          </div>
+            if (input.toUpperCase().trim() === currentData.word) {
+              setScore(s => s + 10 + (streak * 2));
+              setStreak(s => s + 1);
+              setMessage({ text: "Correct", type: 'success' });
+              setIsAnimating(true);
+              setTimeout(() => {
+                setIsAnimating(false);
+                nextLevel();
+              }, 800);
+            } else {
+              setStreak(0);
+              setMessage({ text: "Try again", type: 'error' });
+              setIsAnimating(true);
+              setTimeout(() => {
+                setIsAnimating(false);
+                setMessage(null);
+              }, 1000);
+            }
+          };
 
-       </main>
+          const handleSkip = () => {
+            setStreak(0);
+            setMessage({ text: currentData.word, type: 'info' });
+            setIsAnimating(true);
+            setTimeout(() => {
+              setIsAnimating(false);
+              nextLevel();
+            }, 1500);
+          };
 
-       {/* Footer */}
-       <footer className="w-full p-8 text-center border-t border-gray-50">
-          <div className="flex justify-center gap-6 mb-6">
-             <a href="https://www.linkedin.com/in/rajatkumar7/" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full text-gray-400 hover:text-[#0077b5] hover:bg-blue-50 transition-all">
-                <Linkedin className="w-5 h-5" />
-             </a>
-             <a href="https://github.com/rajatkumar1011" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full text-gray-400 hover:text-black hover:bg-gray-100 transition-all">
-                <Github className="w-5 h-5" />
-             </a>
-          </div>
-          <div className="text-xs text-gray-400 font-medium tracking-wide">
-             <p className="mb-2">Made with <span className="text-red-500 inline-block animate-pulse">♥</span> by Rajat Kumar</p>
-             <p className="opacity-60">© 2026 Rajat Kumar. All Rights Reserved.</p>
-          </div>
-       </footer>
-    </div>
-  );
-}
+          const handleShuffle = () => {
+            if (currentData) {
+              setScrambled(scrambleWord(currentData.word));
+            }
+          };
+
+          const handleHint = () => {
+            if (hintLevel >= 2) return;
+            setScore(s => Math.max(0, s - 5));
+            setHintLevel(h => h + 1);
+          };
+
+          if (!currentData) return <div className="flex h-screen items-center justify-center bg-gray-50 text-gray-400">Loading...</div>;
+
+          return (
+            <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-100 selection:text-blue-900 flex flex-col">
+               {/* Top Bar - Minimal */}
+               <header className="w-full max-w-3xl mx-auto p-6 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">W</div>
+                     <span className="font-semibold tracking-tight text-lg text-gray-800">Word Unscramble</span>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm font-medium text-gray-600">
+                     <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full">
+                        <Trophy className="w-4 h-4 text-gray-500" />
+                        <span>{score}</span>
+                     </div>
+                     <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full">
+                        <Flame className={`w-4 h-4 ${streak > 0 ? 'text-orange-500 fill-orange-500' : 'text-gray-400'}`} />
+                        <span>{streak}</span>
+                     </div>
+                  </div>
+               </header>
+
+               {/* Main Game Container */}
+               <main className="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-2xl mx-auto">
+                  
+                  {/* Status Message Area */}
+                  <div className="h-12 flex items-center justify-center mb-6">
+                     {message && (
+                        <div className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-sm border
+                          ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-100' : 
+                            message.type === 'error' ? 'bg-red-50 text-red-700 border-red-100' : 
+                            'bg-blue-50 text-blue-700 border-blue-100'}`}>
+                           {message.type === 'success' && <Check className="w-4 h-4" />}
+                           {message.text}
+                        </div>
+                     )}
+                  </div>
+
+                  {/* The Word Display */}
+                  <div className="relative w-full text-center py-8">
+                     <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 font-mono">
+                        {scrambled}
+                     </h1>
+                     
+                     {/* Hints */}
+                     <div className="mt-8 h-8 flex items-center justify-center gap-3">
+                        {hintLevel >= 1 && (
+                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                              Starts with <strong className="ml-1 text-gray-900">{currentData.word[0]}</strong>
+                           </span>
+                        )}
+                        {hintLevel >= 2 && (
+                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 animate-in fade-in">
+                              {currentData.hint}
+                           </span>
+                        )}
+                     </div>
+                  </div>
+
+                  {/* Input Area */}
+                  <form onSubmit={handleSubmit} className="w-full max-w-md relative mt-10 group">
+                     <input
+                        ref={inputRef}
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        className="block w-full text-center text-3xl font-medium bg-transparent border-b-2 border-gray-200 focus:border-blue-600 focus:outline-none py-4 transition-colors placeholder:text-gray-200 uppercase tracking-widest text-gray-800"
+                        placeholder="TYPE HERE"
+                        autoFocus
+                        maxLength={20}
+                        autoComplete="off"
+                     />
+                     <div className="absolute right-0 top-0 bottom-0 flex items-center">
+                        <button
+                           type="submit" 
+                           disabled={!input}
+                           className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-0 disabled:translate-x-2 transition-all duration-300 shadow-lg shadow-blue-600/20 active:scale-95"
+                        >
+                           <ArrowRight className="w-5 h-5" />
+                        </button>
+                     </div>
+                  </form>
+
+                  {/* Controls */}
+                  <div className="flex items-center gap-10 mt-16">
+                     <button onClick={handleShuffle} className="flex flex-col items-center gap-2 group">
+                        <div className="p-3.5 rounded-2xl bg-gray-50 text-gray-500 group-hover:bg-gray-100 group-hover:text-gray-900 transition-all border border-transparent group-hover:border-gray-200">
+                           <Shuffle className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-600 transition-colors">Shuffle</span>
+                     </button>
+
+                     <button onClick={handleHint} disabled={hintLevel >= 2} className="flex flex-col items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div className="p-3.5 rounded-2xl bg-gray-50 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all border border-transparent group-hover:border-blue-100">
+                           <Sparkles className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-600 transition-colors">Hint</span>
+                     </button>
+
+                     <button onClick={handleSkip} className="flex flex-col items-center gap-2 group">
+                        <div className="p-3.5 rounded-2xl bg-gray-50 text-gray-500 group-hover:bg-red-50 group-hover:text-red-600 transition-all border border-transparent group-hover:border-red-100">
+                           <RotateCcw className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-600 transition-colors">Skip</span>
+                     </button>
+                  </div>
+
+               </main>
+
+               {/* Footer */}
+               <footer className="w-full p-8 text-center border-t border-gray-50">
+                  <div className="flex justify-center gap-6 mb-6">
+                     <a href="https://www.linkedin.com/in/rajatkumar7/" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full text-gray-400 hover:text-[#0077b5] hover:bg-blue-50 transition-all">
+                        <Linkedin className="w-5 h-5" />
+                     </a>
+                     <a href="https://github.com/rajatkumar1011" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full text-gray-400 hover:text-black hover:bg-gray-100 transition-all">
+                        <Github className="w-5 h-5" />
+                     </a>
+                  </div>
+                  <div className="text-xs text-gray-400 font-medium tracking-wide">
+                     <p className="mb-2">Made with <span className="text-red-500 inline-block animate-pulse">♥</span> by Rajat Kumar</p>
+                     <p className="opacity-60">© 2026 Rajat Kumar. All Rights Reserved.</p>
+                  </div>
+               </footer>
+            </div>
+          );
+        }
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<ScrambleGame />);
+    </script>
+</body>
+</html>
